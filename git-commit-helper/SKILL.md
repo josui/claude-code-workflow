@@ -5,246 +5,86 @@ description: This skill should be used when committing code changes to git. It h
 
 # Git Commit Helper
 
-## Overview
+帮助创建专业的 git commits，遵循项目约定，使用中文提交信息，不包含 AI 生成标记。
 
-Assist with creating professional, well-structured git commits that follow the project's commit conventions. This skill analyzes code changes, suggests appropriate commit types and messages in Chinese, helps split multiple changes into logical commits, and ensures commits are clean without AI-generated markers.
+## 核心工作流程
 
-## When to Use This Skill
-
-Use this skill when:
-- User explicitly requests to commit changes (e.g., "提交这些改动", "创建 commit", "commit these changes")
-- User asks for help with commit messages
-- User wants to split mixed changes into multiple commits
-- After completing a significant code modification and ready to commit
-
-## Core Workflow
-
-### Step 1: Analyze Current Changes
-
-Before creating any commits, understand what has changed:
-
+### 1. 分析变更
 ```bash
-# Run these commands in parallel to gather information
-git status                    # See untracked and modified files
-git diff                      # See unstaged changes
-git diff --staged            # See staged changes
-git log -5 --oneline         # See recent commit style
+git status && git diff && git log -5 --oneline
 ```
 
-Analyze the changes to:
-1. Identify logical groupings (features, bug fixes, documentation, etc.)
-2. Determine if changes should be split into multiple commits
-3. Understand the purpose and impact of each change
+判断是否需要拆分为多个 commit：
+- **单个 commit**: 所有改动服务于同一个目的
+- **多个 commits**: 包含独立的功能、修复或不同类型的改动
 
-### Step 2: Determine Commit Strategy
+### 2. 提交信息格式
 
-Based on the analysis, decide:
-
-**Single Commit** - When changes are:
-- All related to one logical purpose
-- Part of the same feature or fix
-- Interdependent and cannot be separated
-
-**Multiple Commits** - When changes include:
-- Multiple independent features or fixes
-- Different types of changes (feature + docs, fix + refactor)
-- Changes to unrelated components or files
-
-### Step 3: Group and Stage Changes
-
-For multiple commits, group related files:
-
-```bash
-# Group 1: Feature addition
-git add src/templates/pricing/ src/pages/components/pricing.astro
-
-# Group 2: Documentation update
-git add README.md CLAUDE.md
-
-# Group 3: Bug fix
-git add src/components/Preview.astro
-```
-
-### Step 4: Craft Commit Message
-
-Follow the project's commit message format:
-
-**Format:**
 ```
 <type>: <简洁的中文描述>
 
 - <详细说明 1>
 - <详细说明 2>
-- <详细说明 3>
 ```
 
-**Commit Types:**
+**类型 (type):**
 - `add`: 新增功能、组件、文件
-- `update`: 更新、优化、改进现有功能（包含样式调整、重构等）
-- `fix`: 修复 bug、解决问题
-- `docs`: 文档相关的变更
-- `chore`: 构建配置、开发工具、依赖更新
+- `update`: 更新、优化、改进现有功能
+- `fix`: 修复 bug
+- `docs`: 文档变更
+- `chore`: 构建配置、工具、依赖
 
-**Key Rules:**
-- ❌ **NEVER include AI-generated markers** - No "🤖 Generated with Claude Code" or "Co-Authored-By: Claude"
-- ✅ Use concise Chinese descriptions
-- ✅ First line should be under 50 characters
-- ✅ Use present tense (e.g., "新增" not "新增了")
-- ✅ Use bullet points for detailed explanations
-- ✅ Explain "what changed" and "why"
+**关键规则:**
+- ❌ 不包含 AI 生成标记 (如 "🤖 Generated with Claude Code")
+- ✅ 使用中文描述
+- ✅ 首行 < 50 字符
+- ✅ 使用现在时 ("新增" 而非 "新增了")
 
-### Step 5: Create Commit
+### 3. 创建提交
 
-Use heredoc format for multi-line commit messages:
-
+多行消息使用 heredoc:
 ```bash
 git commit -m "$(cat <<'EOF'
-<type>: <简洁描述>
+add: 新增 pricing 组件
 
-- <详细说明 1>
-- <详细说明 2>
+- 三栏价格表布局,支持月付/年付切换
+- 使用 CSS 变量实现主题定制
 EOF
 )"
 ```
 
-For simple commits, single-line is acceptable:
+简单改动可用单行:
 ```bash
 git commit -m "fix: 修复图片路径错误"
 ```
 
-### Step 6: Verify Commit
-
-After committing, verify success:
-
+### 4. 验证提交
 ```bash
-git log -1 --format="%h - %s%n%b"  # Show the commit just created
-git status                          # Confirm clean or expected state
+git log -1 --format="%h - %s%n%b" && git status
 ```
 
-## Commit Examples
+## 拆分多个变更示例
 
-### Example 1: New Component
 ```bash
-git add src/templates/pricing/ src/pages/components/pricing.astro public/images/thumbnails/pricing.png
-git commit -m "$(cat <<'EOF'
-add: 新增 pricing 组件
+# 场景：修改了组件、更新了文档、修复了 bug
 
-- 三栏价格表布局，支持月付/年付切换
-- 使用 CSS 变量实现主题定制
-- 包含组件展示页面和缩略图
-EOF
-)"
-```
-
-### Example 2: Feature Update
-```bash
-git add src/components/Preview.astro
-git commit -m "$(cat <<'EOF'
-update: 优化 Preview 组件响应式尺寸设置
-
-- Desktop 视口从 1280px 调整为 1024px，更符合主流桌面尺寸
-- 将 Tailwind 类替换为原生 CSS，提高可读性和精确控制
-EOF
-)"
-```
-
-### Example 3: Bug Fix
-```bash
-git add src/pages/components/news-card.astro
-git commit -m "$(cat <<'EOF'
-fix: 修复 news-card 页面图片无法显示的问题
-
-- 图片路径从相对路径改为绝对路径
-- 补充缺失的 alt 属性
-EOF
-)"
-```
-
-### Example 4: Simple Change
-```bash
-git add package.json
-git commit -m "update: 开发服务器增加 --host 参数
-
-允许局域网访问开发服务器，方便在移动设备上测试。"
-```
-
-## Splitting Multiple Changes
-
-When `git status` shows multiple unrelated changes:
-
-1. **Identify logical groups** by file purpose and change type
-2. **Stage each group separately** using `git add <files>`
-3. **Create one commit per group** with appropriate message
-4. **Verify after each commit** that staging area is as expected
-
-Example workflow for mixed changes:
-```bash
-# Scenario: Modified news-card component, updated docs, fixed a bug
-
-# Commit 1: Component update
+# Commit 1: 组件更新
 git add src/templates/news-card/
 git commit -m "update: 优化 news-card 组件样式"
 
-# Commit 2: Documentation
+# Commit 2: 文档
 git add CLAUDE.md README.md
 git commit -m "docs: 更新组件使用文档"
 
-# Commit 3: Bug fix
+# Commit 3: Bug 修复
 git add src/components/Preview.astro
 git commit -m "fix: 修复预览窗口尺寸计算错误"
 ```
 
-## Pre-Commit Checklist
+## 交互式指导
 
-Before creating any commit, ensure:
-- [ ] Reviewed all changes with `git diff`
-- [ ] Evaluated if changes should be split
-- [ ] Grouped related files together
-- [ ] Crafted clear, descriptive commit message in Chinese
-- [ ] **Removed any AI-generated markers from message**
-- [ ] Used appropriate commit type (add/update/fix/docs/chore)
-- [ ] Used present tense in descriptions
-
-## Common Pitfalls to Avoid
-
-❌ **Don't:**
-- Include AI-generated markers or co-author tags
-- Mix unrelated changes in one commit
-- Use vague messages like "update: 更新多个文件"
-- Write commit messages in English (project uses Chinese)
-- Use past tense ("新增了" instead of "新增")
-
-✅ **Do:**
-- Keep commits focused on single logical changes
-- Write clear, specific descriptions
-- Split independent changes into separate commits
-- Follow the type conventions strictly
-- Explain both what and why in detailed descriptions
-
-## Interactive Guidance
-
-When helping users commit:
-
-1. **Show what will be committed** - Display `git status` and `git diff` summary
-2. **Suggest grouping strategy** - Recommend single or multiple commits
-3. **Propose commit messages** - Draft messages following conventions
-4. **Confirm before executing** - Let user review suggested commits
-5. **Execute and verify** - Run git commands and show results
-
-## Resources
-
-This skill includes a reference document with the complete commit convention:
-
-### references/commit-convention.md
-
-Complete project commit convention including:
-- Detailed format specifications
-- All commit types with examples
-- Commit granularity principles
-- Real-world case studies
-- Best practices and pitfalls
-
-Load this reference when:
-- User asks for detailed commit convention
-- Need to verify edge cases or special scenarios
-- User wants to understand the rationale behind conventions
+帮助用户提交时:
+1. 显示当前变更 (`git status` 和 `git diff` 摘要)
+2. 建议分组策略 (单个或多个 commits)
+3. 起草提交信息
+4. 执行并验证结果
