@@ -1,6 +1,6 @@
 ---
 name: git-commit-helper
-description: This skill should be used when committing code changes to git. It helps analyze changes, suggest appropriate commit messages following project conventions, split multiple changes into logical commits, and ensure commit messages are professional without AI-generated markers. Use when the user asks to "commit changes", "create commits", or after completing code modifications.
+description: Use this skill for ANY git commit operation unless the user specifically requests otherwise. This skill helps analyze changes, suggest appropriate commit messages following project conventions, split multiple changes into logical commits, and ensure commit messages are professional without AI-generated markers.
 ---
 
 # Git Commit Helper
