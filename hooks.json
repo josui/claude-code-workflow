@@ -1,0 +1,5 @@
+{
+  "SessionStart": {
+    "command": "cat .claude/docs/session-style.md"
+  }
+}
